@@ -76,7 +76,8 @@ namespace AdvantageTool
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-                //app.UseDatabaseErrorPage(); // https://github.com/dotnet/efcore/issues/22687#issuecomment-718803655
+                app.UseMigrationsEndPoint();
+                app.UseDatabaseErrorPage();
             }
             else
             {
@@ -91,6 +92,7 @@ namespace AdvantageTool
             app.UseAuthentication();
 
             app.UseRouting();
+            app.UseAuthorization();
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapHealthChecks("/healthcheck");

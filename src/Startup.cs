@@ -8,6 +8,7 @@ using AdvantageTool.Data;
 using AdvantageTool.Utility;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 namespace AdvantageTool
 {
@@ -58,20 +59,24 @@ namespace AdvantageTool
 
             services.AddMvc()
                 .AddRazorPagesOptions(options => options.Conventions.AuthorizeFolder("/Platforms"))
-                .SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+                .SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
 
             services.AddHttpClient();
+
+            services.AddApplicationInsightsTelemetry();
+            services.AddHealthChecks();
 
             // Make AccessTokenService available for dependency injection.
             services.AddTransient<AccessTokenService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+                app.UseMigrationsEndPoint();
                 app.UseDatabaseErrorPage();
             }
             else
@@ -85,7 +90,14 @@ namespace AdvantageTool
             app.UseStaticFiles();
             app.UseCookiePolicy();
             app.UseAuthentication();
-            app.UseMvc();
+
+            app.UseRouting();
+            app.UseAuthorization();
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapHealthChecks("/healthcheck");
+                endpoints.MapRazorPages();
+            });
         }
     }
 }
